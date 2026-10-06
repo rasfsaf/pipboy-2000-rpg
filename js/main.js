@@ -548,14 +548,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnShareOpen && modalShare) {
     btnShareOpen.addEventListener('click', () => {
       audio.playClick();
-      // Определяем актуальный URL
-      const currentUrl = window.location.href;
+      // Определяем актуальный URL (при локальном запуске используем публичный URL на GitHub Pages)
+      const publicUrl = 'https://rasfsaf.github.io/pipboy-2000-rpg/';
+      const currentUrl = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+        ? publicUrl 
+        : window.location.href;
       if (shareUrlInput) shareUrlInput.value = currentUrl;
 
-      // Генерируем QR-код через проверенный Google/QRServer сервис
+      // Генерируем QR-код через проверенный сервис
       const qrImg = document.getElementById('qrCodeImage');
       if (qrImg) {
-        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(currentUrl)}&color=33-255-68&bgcolor=7-14-6`;
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(currentUrl)}&color=51-255-68&bgcolor=7-14-6`;
       }
       modalShare.style.display = 'flex';
     });
