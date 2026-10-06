@@ -11,6 +11,7 @@ class AsciiRenderer {
   renderWorld(world) {
     if (!this.gridEl) return;
 
+    const isTurbo = document.body.classList.contains('turbo-mode');
     let outputHtml = '';
 
     for (let y = 0; y < world.height; y++) {
@@ -43,31 +44,48 @@ class AsciiRenderer {
 
           // Tile
           const tile = world.grid[y][x];
-          if (tile === '#') {
-            lineHtml += `<span class="tile-wall">#</span>`;
-          } else if (tile === '.') {
-            lineHtml += `<span class="tile-floor">.</span>`;
-          } else if (tile === '~') {
-            lineHtml += `<span class="tile-rad">~</span>`;
-          } else if (tile === '+' || tile === '/') {
-            lineHtml += `<span class="tile-door">${tile}</span>`;
-          } else if (tile === '>') {
-            lineHtml += `<span class="tile-loot">&gt;</span>`;
+          if (isTurbo) {
+            // Turbo Mode: Прямой вывод без тяжелых тегов span для стен и полов
+            if (tile === '~') {
+              lineHtml += `<span class="tile-rad">~</span>`;
+            } else if (tile === '+' || tile === '/') {
+              lineHtml += `<span class="tile-door">${tile}</span>`;
+            } else if (tile === '>') {
+              lineHtml += `<span class="tile-loot">&gt;</span>`;
+            } else {
+              lineHtml += tile; // '#' или '.' напрямую
+            }
           } else {
-            lineHtml += tile;
+            // Стандартный режим
+            if (tile === '#') {
+              lineHtml += `<span class="tile-wall">#</span>`;
+            } else if (tile === '.') {
+              lineHtml += `<span class="tile-floor">.</span>`;
+            } else if (tile === '~') {
+              lineHtml += `<span class="tile-rad">~</span>`;
+            } else if (tile === '+' || tile === '/') {
+              lineHtml += `<span class="tile-door">${tile}</span>`;
+            } else if (tile === '>') {
+              lineHtml += `<span class="tile-loot">&gt;</span>`;
+            } else {
+              lineHtml += tile;
+            }
           }
         } else if (isDiscovered) {
-          // Discovered fog of war (dimmed structure only)
+          // Туман войны
           const tile = world.grid[y][x];
-          if (tile === '#') {
-            lineHtml += `<span style="color:#0f3814">#</span>`;
-          } else if (tile === '~') {
-            lineHtml += `<span style="color:#114420">~</span>`;
+          if (isTurbo) {
+            lineHtml += tile === '#' ? '#' : '.';
           } else {
-            lineHtml += `<span style="color:#09220d">.</span>`;
+            if (tile === '#') {
+              lineHtml += `<span style="color:#0f3814">#</span>`;
+            } else if (tile === '~') {
+              lineHtml += `<span style="color:#114420">~</span>`;
+            } else {
+              lineHtml += `<span style="color:#09220d">.</span>`;
+            }
           }
         } else {
-          // Complete darkness
           lineHtml += ` `;
         }
       }

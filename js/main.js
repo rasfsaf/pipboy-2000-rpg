@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cli.log('  исп &lt;название&gt;   - Применить/надеть предмет (use)', 'msg-system');
     cli.log('  статы (stats)      - Параметры S.P.E.C.I.A.L. и статус', 'msg-system');
     cli.log('  ждать (wait)       - Пропустить ход и восстановить ОД', 'msg-system');
+    cli.log('  турбо (turbo)      - Переключить турбо-режим для слабых телефонов', 'msg-system');
     cli.log('  чистить (clear)    - Очистить экран терминала', 'msg-system');
     cli.log('====================================', 'msg-system');
   };
@@ -47,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
   cli.registerCommand('помощь', showHelp);
   cli.registerCommand('help', showHelp);
   cli.registerCommand('?', showHelp);
+  cli.registerCommand('турбо', () => toggleTurboMode());
+  cli.registerCommand('turbo', () => toggleTurboMode());
 
   const lookSurroundings = () => {
     const tile = world.grid[world.playerY][world.playerX];
@@ -530,6 +533,58 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (e.key === '3') switchTab('inventory');
     else if (e.key === '4') switchTab('archives');
   });
+
+  // --- ТУРБО-РЕЖИМ (ДЛЯ СЛАБЫХ ТЕЛЕФОНОВ / SAMSUNG J4) ---
+  const btnTurboToggle = document.getElementById('btnTurboToggle');
+  
+  function setTurboMode(enable) {
+    if (enable) {
+      document.body.classList.add('turbo-mode');
+      if (btnTurboToggle) {
+        btnTurboToggle.textContent = '⚡ ТУРБО: ВКЛ';
+        btnTurboToggle.classList.add('turbo-active');
+      }
+      localStorage.setItem('pipboy_turbo', 'true');
+    } else {
+      document.body.classList.remove('turbo-mode');
+      if (btnTurboToggle) {
+        btnTurboToggle.textContent = '⚡ ТУРБО: ВЫКЛ';
+        btnTurboToggle.classList.remove('turbo-active');
+      }
+      localStorage.setItem('pipboy_turbo', 'false');
+    }
+    updateAll();
+  }
+
+  function toggleTurboMode() {
+    const isNow = !document.body.classList.contains('turbo-mode');
+    setTurboMode(isNow);
+    audio.playClick();
+    if (isNow) {
+      cli.log('⚡ ТУРБО-РЕЖИМ ВКЛЮЧЕН: сканлинии, мерцание и тени отключены для максимального FPS.', 'msg-item');
+    } else {
+      cli.log('⚡ ТУРБО-РЕЖИМ ВЫКЛЮЧЕН: стандартный ЭЛТ-профиль Pip-Boy восстановлен.', 'msg-system');
+    }
+  }
+
+  btnTurboToggle?.addEventListener('click', toggleTurboMode);
+
+  // Автоопределение слабых мобильных устройств
+  const savedTurbo = localStorage.getItem('pipboy_turbo');
+  if (savedTurbo === 'true') {
+    setTurboMode(true);
+  } else if (savedTurbo === null) {
+    // Если запуск на 4-ядерном бюджетном телефоне (Cortex-A53) или мало памяти
+    const isWeakDevice = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+                         (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+                         (window.innerWidth <= 480);
+    if (isWeakDevice) {
+      setTurboMode(true);
+      setTimeout(() => {
+        cli.log('⚡ Автоматически включен ТУРБО-РЕЖИМ для плавной работы на вашем устройстве.', 'msg-item');
+      }, 500);
+    }
+  }
 
   // Переключатель звука
   document.getElementById('btnAudioToggle')?.addEventListener('click', () => {

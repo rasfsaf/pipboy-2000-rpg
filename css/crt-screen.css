@@ -386,3 +386,72 @@
   background: var(--pip-green);
   color: #000;
 }
+
+/* ==========================================================================
+   РЕЖИМ ТУРБО (ПРОФИЛЬ ДЛЯ СЛАБЫХ МОБИЛЬНЫХ УСТРОЙСТВ / GALAXY J4)
+   ========================================================================== */
+body.turbo-mode *,
+body.turbo-mode *::before,
+body.turbo-mode *::after {
+  animation: none !important;
+  text-shadow: none !important;
+  transition: none !important;
+}
+
+body.turbo-mode .crt-overlay,
+body.turbo-mode .crt-glare,
+body.turbo-mode .tubes-glow-overlay {
+  display: none !important;
+}
+
+body.turbo-mode .pipboy-chassis {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7) !important;
+}
+
+body.turbo-mode .pipboy-screen-bezel {
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8) !important;
+}
+
+body.turbo-mode .ascii-map-container {
+  contain: strict;
+  will-change: transform;
+  box-shadow: none !important;
+}
+
+body.turbo-mode .ascii-grid {
+  letter-spacing: 0.5px;
+  text-shadow: none !important;
+}
+
+body.turbo-mode .tile-player {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+body.turbo-mode .tile-raider {
+  color: #ff4444 !important;
+  font-weight: bold;
+}
+
+body.turbo-mode .tile-radroach {
+  color: #ffaa44 !important;
+}
+
+body.turbo-mode .tile-ghoul {
+  color: #aaff33 !important;
+  font-weight: bold;
+}
+
+body.turbo-mode .tile-loot {
+  color: #ffea33 !important;
+}
+
+body.turbo-mode .tile-rad {
+  color: #33ff99 !important;
+  background-color: transparent !important;
+}
+
+body.turbo-mode .sidebar-panel-tubes {
+  filter: none !important;
+}
+

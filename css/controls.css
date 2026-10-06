@@ -150,6 +150,13 @@
   border-color: var(--pip-green);
 }
 
+.mini-toggle-btn.turbo-active {
+  background: #173816;
+  color: #55ff55 !important;
+  border-color: #55ff55 !important;
+  font-weight: bold;
+}
+
 /* -------------------------------------------------------------
    RESPONSIVE LAYOUT FOR ANDROID & MOBILE SCREENS
    ------------------------------------------------------------- */
