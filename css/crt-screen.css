@@ -1,0 +1,388 @@
+/* ==========================================================================
+   PIP-BOY 2000 CRT PHOSPHOR SCREEN & SCANLINES
+   Vintage green monochrome cathode ray tube monitor
+   ========================================================================== */
+
+.pipboy-screen-bezel {
+  flex: 1;
+  background: #141812;
+  border-radius: 24px;
+  border: 10px solid #20251c;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.95),
+    0 4px 10px rgba(0, 0, 0, 0.8),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.05);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 580px;
+}
+
+/* Glass screen container */
+.crt-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  background-color: #070e06;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+/* Phosphor green glow filter & CRT scanlines overlay */
+.crt-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: 
+    radial-gradient(ellipse at center, rgba(51, 255, 68, 0.04) 0%, rgba(0, 0, 0, 0.6) 95%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0px, rgba(0, 0, 0, 0.28) 1.5px, transparent 1.5px, transparent 3px);
+  box-shadow: inset 0 0 35px rgba(5, 15, 5, 0.85);
+  animation: crt-flicker 0.12s infinite alternate;
+}
+
+/* Glass reflection curved highlight */
+.crt-glare {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(51, 255, 68, 0.01) 40%, transparent 100%);
+  border-radius: 16px 16px 80px 80px / 16px 16px 30px 30px;
+  pointer-events: none;
+  z-index: 11;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.98; }
+  100% { opacity: 1; }
+}
+
+/* Main Display Viewports */
+.screen-viewport {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 14px 16px;
+  overflow-y: auto;
+  color: var(--pip-green);
+  text-shadow: 0 0 5px var(--pip-green-glow);
+  scrollbar-width: thin;
+  scrollbar-color: var(--pip-green-dim) transparent;
+}
+
+.screen-viewport::-webkit-scrollbar {
+  width: 6px;
+}
+.screen-viewport::-webkit-scrollbar-thumb {
+  background: var(--pip-green-dim);
+  border-radius: 3px;
+}
+
+/* CRT Header bar */
+.crt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--pip-green-dim);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.crt-title {
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 8px var(--pip-green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crt-stats-strip {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.stat-val-highlight {
+  color: #fff;
+  text-shadow: 0 0 6px var(--pip-green);
+}
+
+.stat-alert {
+  color: #ff3b30 !important;
+  text-shadow: 0 0 6px rgba(255, 59, 48, 0.8) !important;
+  animation: pulse-danger 1s infinite alternate;
+}
+
+@keyframes pulse-danger {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Tab contents */
+.tab-content {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+.tab-content.active {
+  display: flex;
+}
+
+/* -------------------------------------------------------------
+   ASCII WORLD & GAME MAP RENDERING
+   ------------------------------------------------------------- */
+.ascii-map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #040904;
+  border: 1px solid var(--pip-green-dim);
+  border-radius: 4px;
+  padding: 6px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.95);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.ascii-grid {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 15px;
+  letter-spacing: 1px;
+  white-space: pre;
+  user-select: none;
+  text-align: center;
+}
+
+/* ASCII Entity Styles */
+.tile-player {
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 0 0 8px #55ff55, 0 0 14px #22ff22;
+}
+
+.tile-wall {
+  color: #2b7a35;
+}
+
+.tile-floor {
+  color: #114217;
+}
+
+.tile-radroach {
+  color: #ff9944;
+  text-shadow: 0 0 6px rgba(255, 153, 68, 0.6);
+}
+
+.tile-raider {
+  color: #ff3333;
+  font-weight: bold;
+  text-shadow: 0 0 8px rgba(255, 51, 51, 0.8);
+}
+
+.tile-ghoul {
+  color: #aaff33;
+  font-weight: bold;
+  text-shadow: 0 0 10px #77ff00;
+  animation: pulse-danger 0.8s infinite alternate;
+}
+
+.tile-loot {
+  color: #ffea33;
+  text-shadow: 0 0 6px #ffcc00;
+}
+
+.tile-rad {
+  color: #33ff99;
+  background-color: rgba(51, 255, 153, 0.15);
+}
+
+.tile-door {
+  color: #d1b86e;
+}
+
+/* -------------------------------------------------------------
+   CLI TERMINAL & LOG DISPLAY
+   ------------------------------------------------------------- */
+.cli-log-container {
+  flex: 1;
+  min-height: 110px;
+  max-height: 170px;
+  background: #030803;
+  border: 1px solid var(--pip-green-dim);
+  border-radius: 4px;
+  padding: 8px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.35;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.9);
+}
+
+.cli-msg {
+  word-break: break-word;
+}
+.msg-combat { color: #ff8866; text-shadow: 0 0 4px #ff5533; }
+.msg-system { color: #88ccff; }
+.msg-item { color: #ffea66; }
+.msg-rad { color: #55ffaa; }
+.msg-crit { color: #ff3333; font-weight: bold; text-shadow: 0 0 8px #ff2222; }
+.msg-player { color: #ffffff; }
+
+/* Interactive Command Line Bar */
+.cli-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  background: #0a140a;
+  border: 1px solid var(--pip-green-dim);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.cli-prompt-label {
+  font-weight: bold;
+  font-size: 12px;
+  color: var(--pip-green);
+  text-shadow: 0 0 6px var(--pip-green);
+  white-space: nowrap;
+}
+
+.cli-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-shadow: 0 0 5px var(--pip-green);
+}
+
+.cli-btn-run {
+  background: var(--pip-green-dim);
+  color: #030803;
+  border: none;
+  font-family: var(--font-mono);
+  font-weight: 900;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cli-btn-run:active {
+  background: #fff;
+  transform: scale(0.95);
+}
+
+/* -------------------------------------------------------------
+   PIP-BOY STATS & INVENTORY SCREENS
+   ------------------------------------------------------------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.stats-card {
+  background: #040904;
+  border: 1px solid var(--pip-green-dim);
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stats-card-title {
+  font-size: 12px;
+  font-weight: bold;
+  border-bottom: 1px dashed var(--pip-green-dim);
+  padding-bottom: 4px;
+  color: #fff;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  align-items: center;
+}
+
+.stat-btn-plus {
+  background: var(--pip-green-dim);
+  color: #000;
+  border: none;
+  font-weight: bold;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+.stat-btn-plus:hover {
+  background: var(--pip-green);
+}
+
+.inv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.inv-item-row {
+  background: #040a04;
+  border: 1px solid #1a421e;
+  border-radius: 4px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.inv-item-row:hover {
+  background: #0a1c0a;
+  border-color: var(--pip-green);
+}
+
+.item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-item-action {
+  background: #143818;
+  color: var(--pip-green);
+  border: 1px solid var(--pip-green-dim);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+.btn-item-action:active {
+  background: var(--pip-green);
+  color: #000;
+}

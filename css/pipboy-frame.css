@@ -1,0 +1,325 @@
+/* ==========================================================================
+   PIP-BOY 2000 INDUSTRIAL HARDWARE CASING & SIDEBAR
+   Faithfully inspired by Fallout 1 & Fallout 2 Pip-Boy 2000
+   ========================================================================== */
+
+:root {
+  --pip-green: #33ff44;
+  --pip-green-glow: rgba(51, 255, 68, 0.45);
+  --pip-green-dim: #1d7729;
+  --pip-amber: #ffb000;
+  --pip-amber-glow: rgba(255, 176, 0, 0.4);
+  --pip-red: #ff3b30;
+  --pip-casing-bg: #2b3027;
+  --pip-metal-dark: #191c17;
+  --pip-metal-border: #444a3c;
+  --pip-metal-highlight: #5b6351;
+  --screen-bg: #0a110a;
+  --font-mono: "Courier New", Courier, "Lucida Console", Monaco, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  background: #0d0f0c;
+  background-image: 
+    radial-gradient(circle at 50% 50%, #1e221b 0%, #0d0f0c 100%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 6px);
+  color: var(--pip-green);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  padding: 10px;
+}
+
+/* Master device container */
+.pipboy-chassis {
+  width: 100%;
+  max-width: 1060px;
+  background: #252a22;
+  border-radius: 18px;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.9),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.7);
+  border: 4px solid #1a1e17;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  gap: 16px;
+}
+
+/* Metallic top bracket / clip from Fallout Pip-Boy */
+.pipboy-chassis::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 60%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 12px;
+  background: linear-gradient(180deg, #5b6351 0%, #2e3328 100%);
+  border: 2px solid #161813;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+}
+
+/* Industrial Corner Screws */
+.screw {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #5b6351 20%, #20241c 90%);
+  border: 1px solid #141712;
+  box-shadow: inset 1px 1px 2px rgba(255,255,255,0.3), 1px 1px 2px rgba(0,0,0,0.8);
+  z-index: 5;
+}
+.screw::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  width: 6px;
+  height: 2px;
+  background: #11130e;
+}
+.screw-tl { top: 6px; left: 6px; }
+.screw-tr { top: 6px; right: 6px; }
+.screw-bl { bottom: 6px; left: 6px; }
+.screw-br { bottom: 6px; right: 6px; }
+
+/* -------------------------------------------------------------
+   LEFT SIDEBAR (Classic Fallout 1/2 Control Panel)
+   ------------------------------------------------------------- */
+.pipboy-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+/* 1. Top Section: LED date display & Vault Boy emblem */
+.sidebar-panel-top {
+  background: #1e221b;
+  border: 2px solid #3d4335;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.date-counter {
+  background: #0d120a;
+  border: 1px solid #2e3526;
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: var(--pip-amber);
+  text-shadow: 0 0 6px var(--pip-amber-glow);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.9);
+}
+
+.rad-symbol {
+  color: #ff3b30;
+  animation: rad-blink 1.8s infinite ease-in-out;
+}
+
+@keyframes rad-blink {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; text-shadow: 0 0 8px #ff3b30; }
+}
+
+.badge-frame {
+  width: 100%;
+  height: 120px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid #4a5240;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.7);
+  background-color: #121410;
+  position: relative;
+}
+
+.badge-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.1) brightness(0.95);
+  transition: transform 0.3s ease;
+}
+
+.badge-frame:hover .badge-img {
+  transform: scale(1.03);
+}
+
+/* 2. Middle Section: Vacuum tubes with glowing filaments */
+.sidebar-panel-tubes {
+  width: 100%;
+  height: 130px;
+  border: 2px solid #3d4335;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.9), 0 3px 6px rgba(0,0,0,0.5);
+  background: #11140e;
+}
+
+.tubes-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.15) brightness(0.9);
+}
+
+/* Warm pulsating orange glow overlay */
+.tubes-glow-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 60%, rgba(255, 120, 20, 0.3) 0%, transparent 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: tube-pulsate 3.2s infinite ease-in-out;
+}
+
+@keyframes tube-pulsate {
+  0%, 100% { opacity: 0.6; filter: brightness(1); }
+  50% { opacity: 0.95; filter: brightness(1.3); }
+}
+
+/* 3. Bottom Section: Hazard-striped buttons panel with red LEDs */
+.sidebar-panel-buttons {
+  background: #1b1f18;
+  border: 2px solid #3d4335;
+  border-radius: 8px;
+  padding: 10px 8px;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.5);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Yellow/Black hazard warning stripe on left side */
+.hazard-stripe-bar {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 6px;
+  width: 18px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #d1a117 0,
+    #d1a117 8px,
+    #181a16 8px,
+    #181a16 16px
+  );
+  border: 1px solid #0d0f0c;
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.6);
+}
+
+.buttons-column {
+  margin-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* Pip-Boy switch button */
+.pip-switch-btn {
+  background: linear-gradient(180deg, #373e31 0%, #20241c 100%);
+  border: 1px solid #4a5240;
+  border-bottom: 2px solid #141611;
+  border-radius: 5px;
+  color: #c8d4bf;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.pip-switch-btn:hover {
+  background: linear-gradient(180deg, #444c3c 0%, #2a3025 100%);
+  color: #fff;
+}
+
+.pip-switch-btn:active,
+.pip-switch-btn.active {
+  background: linear-gradient(180deg, #181b15 0%, #282f23 100%);
+  border-color: #24291f;
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+  color: var(--pip-green);
+}
+
+/* Red / Green LED indicator on each button */
+.led-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4a1515;
+  border: 1px solid #1a0808;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.pip-switch-btn.active .led-indicator {
+  background: #ff3333;
+  box-shadow: 0 0 8px #ff3333, inset 0 1px 2px rgba(255,255,255,0.6);
+}
+
+/* Colored conduit wires connecting sidebar to CRT */
+.conduit-wires {
+  position: absolute;
+  right: -16px;
+  top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  pointer-events: none;
+}
+
+.wire {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.7);
+}
+.wire-red { background: #b82828; }
+.wire-blue { background: #2460b5; }
+.wire-yellow { background: #c29521; }
+.wire-green { background: #268537; }

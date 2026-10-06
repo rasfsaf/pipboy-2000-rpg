@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pip-Boy 2000 - ASCII RPG System</title>
+  
+  <!-- Retro Stylesheets -->
+  <link rel="stylesheet" href="css/pipboy-frame.css">
+  <link rel="stylesheet" href="css/crt-screen.css">
+  <link rel="stylesheet" href="css/controls.css">
+</head>
+<body>
+
+  <!-- PIP-BOY 2000 PHYSICAL DEVICE CHASSIS -->
+  <div class="pipboy-chassis">
+    <!-- Corner Hardware Screws -->
+    <div class="screw screw-tl"></div>
+    <div class="screw screw-tr"></div>
+    <div class="screw screw-bl"></div>
+    <div class="screw screw-br"></div>
+
+    <!-- Quick Audio & Screen Toggle -->
+    <div class="device-controls-top">
+      <button class="mini-toggle-btn" id="btnAudioToggle">AUDIO: ON</button>
+    </div>
+
+    <!-- ==============================================================
+         LEFT HARDWARE PANEL (Fallout 1 / Fallout 2 Pip-Boy 2000)
+         ============================================================== -->
+    <aside class="pipboy-sidebar">
+      <!-- 1. Top Section: Date / Time LED Display & Vault Boy Plaque -->
+      <div class="sidebar-panel-top">
+        <div class="date-counter">
+          <span>01 APR 2242</span>
+          <span class="rad-symbol">☢</span>
+          <span>0030</span>
+        </div>
+        <div class="badge-frame">
+          <img src="assets/pipboy_badge.jpg" alt="Pip-Boy 2000 Emblem" class="badge-img">
+        </div>
+      </div>
+
+      <!-- 2. Middle Section: Glowing Nixie / Vacuum Radio Tubes -->
+      <div class="sidebar-panel-tubes">
+        <img src="assets/vacuum_tubes.jpg" alt="Vacuum Radio Tubes" class="tubes-img">
+        <div class="tubes-glow-overlay"></div>
+      </div>
+
+      <!-- 3. Bottom Section: Heavy Industrial Switch Buttons -->
+      <div class="sidebar-panel-buttons">
+        <div class="hazard-stripe-bar"></div>
+        
+        <div class="buttons-column">
+          <button class="pip-switch-btn" id="btnNavStatus">
+            <span class="led-indicator"></span>
+            <span>STATUS</span>
+          </button>
+          
+          <button class="pip-switch-btn active" id="btnNavGame">
+            <span class="led-indicator"></span>
+            <span>MAP / GAME</span>
+          </button>
+          
+          <button class="pip-switch-btn" id="btnNavInventory">
+            <span class="led-indicator"></span>
+            <span>INVENTORY</span>
+          </button>
+          
+          <button class="pip-switch-btn" id="btnNavArchives">
+            <span class="led-indicator"></span>
+            <span>ARCHIVES</span>
+          </button>
+        </div>
+
+        <!-- Conduit Wires connecting sidebar to the CRT screen -->
+        <div class="conduit-wires">
+          <div class="wire wire-red"></div>
+          <div class="wire wire-blue"></div>
+          <div class="wire wire-yellow"></div>
+          <div class="wire wire-green"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==============================================================
+         CENTER / RIGHT CRT PHOSPHOR SCREEN & GAMEPLAY
+         ============================================================== -->
+    <main class="pipboy-screen-bezel">
+      <div class="crt-screen">
+        <!-- CRT Phosphor Green Scanlines & Glass Reflection -->
+        <div class="crt-overlay"></div>
+        <div class="crt-glare"></div>
+
+        <!-- Main Display Viewport -->
+        <div class="screen-viewport">
+          <!-- Top Telemetry Status Header -->
+          <header class="crt-header">
+            <div class="crt-title">
+              <span>PIP-BOY 2000</span>
+              <span style="font-size: 10px; opacity: 0.7;">[VAULT-TEC OS]</span>
+            </div>
+            <div class="crt-stats-strip">
+              <div>HP: <span id="hudHp" class="stat-val-highlight">--/--</span></div>
+              <div>AP: <span id="hudAp" class="stat-val-highlight">--/--</span></div>
+              <div>RAD: <span id="hudRads">0r</span></div>
+              <div>CAPS: <span id="hudCaps" class="stat-val-highlight">0</span>☢</div>
+            </div>
+          </header>
+
+          <!-- TAB 1: ASCII WORLD GAMEPLAY & LOG -->
+          <section id="tabGame" class="tab-content active">
+            <!-- ASCII Roguelike Screen -->
+            <div class="ascii-map-container">
+              <pre id="asciiGrid" class="ascii-grid">INITIALIZING ASCII MATRIX...</pre>
+            </div>
+
+            <!-- Custom CLI Console Output Log -->
+            <div id="cliLog" class="cli-log-container"></div>
+
+            <!-- Interactive CLI Input Bar -->
+            <div class="cli-input-bar">
+              <span class="cli-prompt-label">PIP-OS &gt;</span>
+              <input type="text" id="cliInput" class="cli-input" placeholder="type 'help', 'look', 'n', 'attack', 'vats'..." autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button id="btnRunCmd" class="cli-btn-run">EXEC</button>
+            </div>
+          </section>
+
+          <!-- TAB 2: CHARACTER SHEET / S.P.E.C.I.A.L. STATS -->
+          <section id="tabStatus" class="tab-content"></section>
+
+          <!-- TAB 3: INVENTORY & EQUIPMENT -->
+          <section id="tabInventory" class="tab-content"></section>
+
+          <!-- TAB 4: ARCHIVES & LORE -->
+          <section id="tabArchives" class="tab-content"></section>
+
+          <!-- ==============================================================
+               ANDROID & MOBILE ON-SCREEN TOUCH CONTROLS
+               ============================================================== -->
+          <nav class="mobile-touch-hud">
+            <!-- Virtual Touch D-Pad -->
+            <div class="dpad-container">
+              <button class="dpad-btn dpad-up" id="dpadUp">▲</button>
+              <button class="dpad-btn dpad-left" id="dpadLeft">◀</button>
+              <button class="dpad-btn dpad-wait" id="dpadWait">WAIT</button>
+              <button class="dpad-btn dpad-right" id="dpadRight">▶</button>
+              <button class="dpad-btn dpad-down" id="dpadDown">▼</button>
+            </div>
+
+            <!-- Quick Action Touch Buttons -->
+            <div class="touch-actions-group">
+              <div class="action-row">
+                <button class="action-touch-btn btn-atk" id="btnTouchAtk">⚔ ATK</button>
+                <button class="action-touch-btn btn-vats" id="btnTouchVats">🎯 VATS</button>
+              </div>
+              <div class="action-row">
+                <button class="action-touch-btn" id="btnTouchStimpak">💉 STIM</button>
+                <button class="action-touch-btn" id="btnTouchInv">🎒 INV</button>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="js/audio.js"></script>
+  <script src="js/rpg-stats.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/combat.js"></script>
+  <script src="js/cli.js"></script>
+  <script src="js/ascii-renderer.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
