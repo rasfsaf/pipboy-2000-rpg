@@ -1,6 +1,6 @@
 /**
- * ASCII Roguelike World & Map Generator
- * Generates Vault 13 bunker ruins, radiation pools, loot caches, and wasteland mutants.
+ * ASCII Roguelike World Generator (Русская локализация)
+ * Генерация сектора убежища Vault 13, лужи радиации, ящики с припасами и монстры пустоши.
  */
 
 class WorldMap {
@@ -23,7 +23,7 @@ class WorldMap {
     this.discovered = [];
     this.visible = [];
 
-    // Base map template of Vault 13 sub-level ruins
+    // Базовый план сектора убежища
     const mapTemplate = [
       "###########################",
       "#...#.....#.......#.......#",
@@ -62,7 +62,7 @@ class WorldMap {
           this.enemies.push({
             id: enemyId++,
             type: 'radroach',
-            name: 'Radroach',
+            name: 'Радтаракан',
             symbol: 'r',
             x: x,
             y: y,
@@ -79,7 +79,7 @@ class WorldMap {
           this.enemies.push({
             id: enemyId++,
             type: 'raider',
-            name: 'Wasteland Raider',
+            name: 'Рейдер Пустоши',
             symbol: 'R',
             x: x,
             y: y,
@@ -96,7 +96,7 @@ class WorldMap {
           this.enemies.push({
             id: enemyId++,
             type: 'ghoul',
-            name: 'Glowing One Ghoul',
+            name: 'Светящийся гуль',
             symbol: 'G',
             x: x,
             y: y,
@@ -128,10 +128,10 @@ class WorldMap {
 
   generateRandomLoot() {
     const table = [
-      [{ id: 'stimpak', name: 'Stimpak', type: 'med', heal: 25, weight: 0.5, value: 25, count: 2 }],
-      [{ id: '10mm_ammo', name: '10mm JHP Ammo', type: 'ammo', weight: 0.05, value: 2, count: 18 }, { id: 'caps', name: 'Bottle Caps', count: 25 }],
-      [{ id: 'radaway', name: 'RadAway', type: 'med', radHeal: 60, weight: 0.5, value: 40, count: 1 }, { id: 'nuka_cola', name: 'Nuka-Cola', type: 'food', heal: 8, rads: 3, weight: 1, count: 2 }],
-      [{ id: 'combat_knife', name: 'Combat Knife', type: 'weapon', minDmg: 4, maxDmg: 8, apCost: 3, range: 1, weight: 1, value: 30, count: 1 }]
+      [{ id: 'stimpak', name: 'Стимпак', type: 'med', heal: 25, weight: 0.5, value: 25, count: 2 }],
+      [{ id: '10mm_ammo', name: 'Патроны 10мм JHP', type: 'ammo', weight: 0.05, value: 2, count: 18 }, { id: 'caps', name: 'Крышки от бутылок', count: 25 }],
+      [{ id: 'radaway', name: 'Антирадин (RadAway)', type: 'med', radHeal: 60, weight: 0.5, value: 40, count: 1 }, { id: 'nuka_cola', name: 'Ядер-Кола', type: 'food', heal: 8, rads: 3, weight: 1, count: 2 }],
+      [{ id: 'combat_knife', name: 'Боевой нож', type: 'weapon', minDmg: 4, maxDmg: 8, apCost: 3, range: 1, weight: 1, value: 30, count: 1 }]
     ];
     return table[Math.floor(Math.random() * table.length)];
   }
@@ -140,7 +140,6 @@ class WorldMap {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) return false;
     const tile = this.grid[y][x];
     if (tile === '#' || tile === '+') return false;
-    // Check enemy collision
     if (this.getEnemyAt(x, y)) return false;
     return true;
   }
@@ -159,7 +158,6 @@ class WorldMap {
         this.visible[y][x] = false;
         const dist = Math.hypot(x - pX, y - pY);
         if (dist <= radius) {
-          // Simple LOS raycast
           if (this.hasLineOfSight(pX, pY, x, y)) {
             this.visible[y][x] = true;
             this.discovered[y][x] = true;

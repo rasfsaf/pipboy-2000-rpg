@@ -1,43 +1,43 @@
 /**
- * Fallout S.P.E.C.I.A.L. RPG System
- * Attributes, derived stats, skills, radiation, experience & leveling.
+ * Fallout S.P.E.C.I.A.L. RPG System (Русская локализация)
+ * Характеристики, производные статы, навыки, лучевая болезнь, опыт и уровень.
  */
 
 class RpgStats {
   constructor() {
     // S.P.E.C.I.A.L.
     this.special = {
-      ST: 6, // Strength
-      PE: 7, // Perception
-      EN: 5, // Endurance
-      CH: 4, // Charisma
-      IN: 6, // Intelligence
-      AG: 8, // Agility
-      LK: 6  // Luck
+      ST: 6, // Сила
+      PE: 7, // Восприятие
+      EN: 5, // Выносливость
+      CH: 4, // Харизма
+      IN: 6, // Интеллект
+      AG: 8, // Ловкость
+      LK: 6  // Удача
     };
 
-    // Progression
+    // Прогрессия
     this.level = 1;
     this.xp = 0;
     this.nextLevelXp = 1000;
     this.skillPoints = 0;
 
-    // Survival
+    // Выживание
     this.maxHp = this.calcMaxHp();
     this.hp = this.maxHp;
     this.maxAp = this.calcMaxAp();
     this.ap = this.maxAp;
-    this.rads = 0; // 0 - 1000 rads
+    this.rads = 0; // 0 - 1000 рад
     this.caps = 45;
 
-    // Skills (% based)
+    // Навыки (в процентах %)
     this.skills = {
-      smallGuns: 35 + (this.special.AG * 2),
-      melee: 30 + (this.special.ST + this.special.AG),
-      firstAid: 20 + (this.special.PE + this.special.IN),
-      lockpick: 25 + (this.special.PE + this.special.AG),
-      science: 25 + (this.special.IN * 2),
-      speech: 25 + (this.special.CH * 2)
+      smallGuns: 35 + (this.special.AG * 2), // Легкое оружие
+      melee: 30 + (this.special.ST + this.special.AG), // Рукопашный бой
+      firstAid: 20 + (this.special.PE + this.special.IN), // Первая помощь
+      lockpick: 25 + (this.special.PE + this.special.AG), // Взлом замков
+      science: 25 + (this.special.IN * 2), // Наука
+      speech: 25 + (this.special.CH * 2) // Красноречие
     };
   }
 
@@ -58,7 +58,7 @@ class RpgStats {
   }
 
   calcCritChance() {
-    return this.special.LK; // Base crit % equal to Luck
+    return this.special.LK;
   }
 
   addXp(amount) {
@@ -99,13 +99,12 @@ class RpgStats {
 
   addRads(amount) {
     this.rads = Math.min(1000, this.rads + amount);
-    // Rad sickness reduces max stats if high
     if (this.rads >= 200 && this.rads < 400) {
-      return "MINOR RADIATION POISONING (-1 STR)";
+      return "ЛЕГКОЕ ЛУЧЕВОЕ ОТРАВЛЕНИЕ (-1 СИЛ)";
     } else if (this.rads >= 400 && this.rads < 600) {
-      return "ADVANCED RADIATION POISONING (-2 STR, -1 AGI)";
+      return "СРЕДНЕЕ ЛУЧЕВОЕ ОТРАВЛЕНИЕ (-2 СИЛ, -1 ЛОВ)";
     } else if (this.rads >= 600) {
-      return "CRITICAL RADIATION POISONING (-3 STR, -3 AGI, -2 END)";
+      return "КРИТИЧЕСКОЕ ЛУЧЕВОЕ ОТРАВЛЕНИЕ (-3 СИЛ, -3 ЛОВ, -2 ВЫН)";
     }
     return null;
   }

@@ -1,6 +1,6 @@
 /**
- * Main Application Orchestrator for Pip-Boy 2000
- * Handles UI tab switching, user input, touch D-Pad controls, game loop & CLI bindings.
+ * Main Application Orchestrator for Pip-Boy 2000 (Русская локализация)
+ * Обработка вкладок, команд терминала на русском и английском, сенсорного управления и шеринга.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const asciiRenderer = new window.AsciiRenderer('asciiGrid');
   const combat = new window.CombatEngine(stats, inventory, world, cli, audio);
 
-  // Tab State
   let currentTab = 'game';
 
   // --- UI References ---
@@ -30,122 +29,150 @@ document.addEventListener('DOMContentLoaded', () => {
   const cliInput = document.getElementById('cliInput');
   const btnRunCmd = document.getElementById('btnRunCmd');
 
-  // --- Register CLI Commands ---
-  cli.registerCommand('help', () => {
-    cli.log('=== PIP-OS 2000 COMMAND PROTOCOL ===', 'msg-system');
-    cli.log('  look           - Inspect current coordinates and surroundings', 'msg-system');
-    cli.log('  n / s / e / w  - Move North, South, East, West (or "move &lt;dir&gt;")', 'msg-system');
-    cli.log('  attack [part]  - Attack adjacent target (head/torso/legs)', 'msg-system');
-    cli.log('  vats           - Tactical VATS precision targeting', 'msg-system');
-    cli.log('  inv            - List carried equipment and supplies', 'msg-system');
-    cli.log('  use &lt;item&gt;    - Use or equip item (e.g. "use stimpak")', 'msg-system');
-    cli.log('  stats          - View S.P.E.C.I.A.L. attributes', 'msg-system');
-    cli.log('  wait           - Rest 1 turn to regenerate Action Points', 'msg-system');
-    cli.log('  clear          - Clear terminal display buffer', 'msg-system');
+  // --- Регистрация команд CLI (русские и английские алиасы) ---
+  const showHelp = () => {
+    cli.log('=== ПРОТОКОЛ КОМАНД PIP-OS 2000 ===', 'msg-system');
+    cli.log('  осмотр (look)      - Осмотреть текущие координаты и окружение', 'msg-system');
+    cli.log('  с / ю / в / з      - Движение: Север, Юг, Восток, Запад (n, s, e, w)', 'msg-system');
+    cli.log('  атака [часть]      - Атаковать цель: голова, торс, ноги (attack)', 'msg-system');
+    cli.log('  ватс (vats)        - Тактический режим прицеливания V.A.T.S.', 'msg-system');
+    cli.log('  инв (inv)          - Список снаряжения и припасов', 'msg-system');
+    cli.log('  исп &lt;название&gt;   - Применить/надеть предмет (use)', 'msg-system');
+    cli.log('  статы (stats)      - Параметры S.P.E.C.I.A.L. и статус', 'msg-system');
+    cli.log('  ждать (wait)       - Пропустить ход и восстановить ОД', 'msg-system');
+    cli.log('  чистить (clear)    - Очистить экран терминала', 'msg-system');
     cli.log('====================================', 'msg-system');
-  }, 'List commands');
+  };
 
-  cli.registerCommand('look', () => {
+  cli.registerCommand('помощь', showHelp);
+  cli.registerCommand('help', showHelp);
+  cli.registerCommand('?', showHelp);
+
+  const lookSurroundings = () => {
     const tile = world.grid[world.playerY][world.playerX];
-    let tileDesc = 'You stand on cold cracked Vault concrete.';
-    if (tile === '~') tileDesc = 'WARNING: You stand inside toxic radioactive sludge! Geiger counter clicks rapidly!';
+    let tileDesc = 'Вы стоите на холодном потрескавшемся бетоне сектора Убежища.';
+    if (tile === '~') tileDesc = 'ВНИМАНИЕ: Вы стоите в радиоактивной луже! Счетчик Гейгера трещит!';
     
-    // Check nearby entities
     const nearby = world.enemies.filter(e => e.hp > 0 && Math.hypot(e.x - world.playerX, e.y - world.playerY) <= 4);
-    let enemyDesc = nearby.length > 0 ? `Detected ${nearby.length} hostile creature(s) nearby: ${nearby.map(e => e.name).join(', ')}.` : 'No immediate hostiles in sight.';
+    let enemyDesc = nearby.length > 0 ? `Обнаружены враги поблизости (${nearby.length}): ${nearby.map(e => e.name).join(', ')}.` : 'Поблизости врагов не видно.';
     
     cli.log(`${tileDesc} ${enemyDesc}`, 'msg-system');
-  });
+  };
 
+  cli.registerCommand('осмотр', lookSurroundings);
+  cli.registerCommand('look', lookSurroundings);
+
+  cli.registerCommand('чистить', () => cli.clear());
   cli.registerCommand('clear', () => cli.clear());
   cli.registerCommand('cls', () => cli.clear());
 
-  cli.registerCommand('wait', () => {
+  const waitTurn = () => {
     stats.restoreAp();
     combat.enemyTurn();
-    cli.log('You wait a turn. Action Points replenished.', 'msg-system');
+    cli.log('Вы перевели дыхание. Очки Действия восстановлены.', 'msg-system');
     updateAll();
-  });
+  };
 
+  cli.registerCommand('ждать', waitTurn);
+  cli.registerCommand('отдых', waitTurn);
+  cli.registerCommand('wait', waitTurn);
+
+  // Движение
+  cli.registerCommand('с', () => movePlayer(0, -1));
   cli.registerCommand('n', () => movePlayer(0, -1));
+  cli.registerCommand('ю', () => movePlayer(0, 1));
   cli.registerCommand('s', () => movePlayer(0, 1));
+  cli.registerCommand('в', () => movePlayer(1, 0));
   cli.registerCommand('e', () => movePlayer(1, 0));
+  cli.registerCommand('з', () => movePlayer(-1, 0));
   cli.registerCommand('w', () => movePlayer(-1, 0));
 
-  cli.registerCommand('move', (args) => {
+  const handleMove = (args) => {
     const dir = args[0]?.toLowerCase();
-    if (dir === 'n' || dir === 'north') movePlayer(0, -1);
-    else if (dir === 's' || dir === 'south') movePlayer(0, 1);
-    else if (dir === 'e' || dir === 'east') movePlayer(1, 0);
-    else if (dir === 'w' || dir === 'west') movePlayer(-1, 0);
-    else cli.log('Specify direction: n, s, e, w', 'msg-combat');
-  });
+    if (dir === 'с' || dir === 'север' || dir === 'n' || dir === 'north') movePlayer(0, -1);
+    else if (dir === 'ю' || dir === 'юг' || dir === 's' || dir === 'south') movePlayer(0, 1);
+    else if (dir === 'в' || dir === 'восток' || dir === 'e' || dir === 'east') movePlayer(1, 0);
+    else if (dir === 'з' || dir === 'запад' || dir === 'w' || dir === 'west') movePlayer(-1, 0);
+    else cli.log('Укажите направление: с, ю, в, з (n, s, e, w)', 'msg-combat');
+  };
+  cli.registerCommand('идти', handleMove);
+  cli.registerCommand('move', handleMove);
 
-  cli.registerCommand('attack', (args) => {
-    const part = args[0] || 'torso';
-    // Find closest enemy
+  const handleAttack = (args) => {
+    const part = args[0] || 'торс';
     const target = getClosestEnemy();
     if (!target) {
-      cli.log('No targets in range to attack!', 'msg-combat');
+      cli.log('Поблизости нет целей для атаки!', 'msg-combat');
       return;
     }
     combat.attackTarget(target, part);
     updateAll();
-  });
+  };
+  cli.registerCommand('атака', handleAttack);
+  cli.registerCommand('attack', handleAttack);
+  cli.registerCommand('atk', handleAttack);
 
-  cli.registerCommand('vats', () => {
-    triggerVats();
-  });
+  const handleVats = () => triggerVats();
+  cli.registerCommand('ватс', handleVats);
+  cli.registerCommand('vats', handleVats);
 
-  cli.registerCommand('stats', () => {
-    cli.log(`S.P.E.C.I.A.L.: ST:${stats.special.ST} PE:${stats.special.PE} EN:${stats.special.EN} CH:${stats.special.CH} IN:${stats.special.IN} AG:${stats.special.AG} LK:${stats.special.LK}`, 'msg-system');
-    cli.log(`Level: ${stats.level} | XP: ${stats.xp}/${stats.nextLevelXp} | HP: ${stats.hp}/${stats.maxHp} | AP: ${stats.ap}/${stats.maxAp} | Rads: ${stats.rads} rads`, 'msg-system');
-  });
+  const handleStats = () => {
+    cli.log(`S.P.E.C.I.A.L.: СИЛ:${stats.special.ST} ВОС:${stats.special.PE} ВЫН:${stats.special.EN} ХАР:${stats.special.CH} ИНТ:${stats.special.IN} ЛОВ:${stats.special.AG} УДЧ:${stats.special.LK}`, 'msg-system');
+    cli.log(`Уровень: ${stats.level} | Опыт: ${stats.xp}/${stats.nextLevelXp} | Здоровье: ${stats.hp}/${stats.maxHp} | ОД: ${stats.ap}/${stats.maxAp} | Радиация: ${stats.rads} рад`, 'msg-system');
+  };
+  cli.registerCommand('статы', handleStats);
+  cli.registerCommand('stats', handleStats);
 
-  cli.registerCommand('inv', () => {
-    cli.log('--- PIP-BOY INVENTORY ---', 'msg-item');
+  const handleInv = () => {
+    cli.log('--- ИНВЕНТАРЬ PIP-BOY ---', 'msg-item');
     inventory.items.forEach(i => {
-      const eq = (inventory.equippedWeapon?.id === i.id || inventory.equippedArmor?.id === i.id) ? '[EQUIPPED]' : '';
-      cli.log(`• ${i.name} x${i.count} (Wt: ${i.weight * i.count} lbs) ${eq}`, 'msg-item');
+      const eq = (inventory.equippedWeapon?.id === i.id || inventory.equippedArmor?.id === i.id) ? '[НАДЕТО]' : '';
+      cli.log(`• ${i.name} x${i.count} (Вес: ${Math.round(i.weight * i.count * 10)/10} фнт) ${eq}`, 'msg-item');
     });
-    cli.log(`Total Weight: ${inventory.getTotalWeight()}/${stats.calcCarryWeight()} lbs | Caps: ${stats.caps}`, 'msg-system');
-  });
+    cli.log(`Общий вес: ${Math.round(inventory.getTotalWeight())}/${stats.calcCarryWeight()} фнт | Крышки: ${stats.caps} ☢`, 'msg-system');
+  };
+  cli.registerCommand('инв', handleInv);
+  cli.registerCommand('инвентарь', handleInv);
+  cli.registerCommand('inv', handleInv);
 
-  cli.registerCommand('use', (args) => {
+  const handleUse = (args) => {
     const query = args.join(' ').toLowerCase();
     if (!query) {
-      cli.log('Usage: use <item name>', 'msg-combat');
+      cli.log('Использование: исп <название предмета>', 'msg-combat');
       return;
     }
-    const item = inventory.items.find(i => i.name.toLowerCase().includes(query) || i.id.includes(query));
+    const item = inventory.findItemByName(query);
     if (item) {
       const msg = inventory.useItem(item);
       cli.log(msg, 'msg-item');
       audio.playClick();
       updateAll();
     } else {
-      cli.log(`Item "${query}" not found in inventory.`, 'msg-combat');
+      cli.log(`Предмет "${query}" не найден в инвентаре.`, 'msg-combat');
     }
-  });
+  };
+  cli.registerCommand('исп', handleUse);
+  cli.registerCommand('использовать', handleUse);
+  cli.registerCommand('use', handleUse);
 
-  // --- Player Movement & Tile Interactions ---
+  // --- Перемещение игрока ---
   function movePlayer(dx, dy) {
     const newX = world.playerX + dx;
     const newY = world.playerY + dy;
 
-    // Check door interaction
+    // Взаимодействие с дверью
     if (world.grid[newY] && world.grid[newY][newX] === '+') {
       world.grid[newY][newX] = '/';
-      cli.log('You opened the reinforced security door.', 'msg-system');
+      cli.log('Вы открыли бронированную гермодверь.', 'msg-system');
       audio.playClick();
       updateAll();
       return;
     }
 
-    // Check enemy bump attack
+    // Атака при шаге во врага
     const enemyAtTile = world.getEnemyAt(newX, newY);
     if (enemyAtTile) {
-      combat.attackTarget(enemyAtTile, 'torso');
+      combat.attackTarget(enemyAtTile, 'торс');
       updateAll();
       return;
     }
@@ -160,38 +187,37 @@ document.addEventListener('DOMContentLoaded', () => {
     world.computeFov(world.playerX, world.playerY, 6);
     audio.playClick();
 
-    // Check radiation puddle
+    // Радиационная зона
     if (world.grid[newY][newX] === '~') {
       audio.playGeiger();
       stats.addRads(4);
-      cli.log('☢ RADIATION CONTAMINATION! +4 RADS!', 'msg-rad');
+      cli.log('☢ РАДИОАКТИВНОЕ ЗАРАЖЕНИЕ! +4 РАД!', 'msg-rad');
     }
 
-    // Check loot cache
+    // Сбор лута
     const loot = world.getLootAt(newX, newY);
     if (loot) {
       loot.items.forEach(it => {
         if (it.id === 'caps') {
           stats.caps += it.count;
-          cli.log(`Found ${it.count} Bottle Caps in container!`, 'msg-item');
+          cli.log(`Найдено ${it.count} крышек от бутылок!`, 'msg-item');
         } else {
           inventory.addItem(it);
-          cli.log(`Scavenged ${it.name} x${it.count || 1}!`, 'msg-item');
+          cli.log(`Подобрано: ${it.name} x${it.count || 1}!`, 'msg-item');
         }
       });
       world.loot = world.loot.filter(l => l.id !== loot.id);
       audio.playLevelUp();
     }
 
-    // Check bunker exit
+    // Лифт на поверхность
     if (world.grid[newY][newX] === '>') {
-      cli.log('★ Vault 13 Sector Cleared! Elevator to Wasteland accessible! ★', 'msg-crit');
+      cli.log('★ Сектор Убежища 13 зачищен! Доступен лифт в Пустошь! ★', 'msg-crit');
       audio.playLevelUp();
     }
 
-    // Spend AP for movement (1 AP per step)
+    // Расход 1 ОД на шаг
     if (!stats.spendAp(1)) {
-      // AP depleted, trigger enemy turn and restore
       combat.enemyTurn();
       stats.restoreAp();
     }
@@ -217,27 +243,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function triggerVats() {
     const target = getClosestEnemy();
     if (!target) {
-      cli.log('V.A.T.S. ERROR: No hostile target in sight!', 'msg-combat');
+      cli.log('ОШИБКА V.A.T.S.: В зоне видимости нет врагов!', 'msg-combat');
       audio.playBeep(250, 0.1);
       return;
     }
 
     audio.playBeep(1400, 0.15);
-    const headPct = combat.calculateHitChance(target, 'head');
-    const torsoPct = combat.calculateHitChance(target, 'torso');
-    const legsPct = combat.calculateHitChance(target, 'legs');
+    const headPct = combat.calculateHitChance(target, 'голова');
+    const torsoPct = combat.calculateHitChance(target, 'торс');
+    const legsPct = combat.calculateHitChance(target, 'ноги');
 
-    const choice = prompt(`=== V.A.T.S. TARGET ACQUISITION ===\nTarget: ${target.name} (HP: ${target.hp}/${target.maxHp})\n\n1: HEAD (${headPct}% - High Crit / 2.2x Dmg)\n2: TORSO (${torsoPct}% - High Accuracy)\n3: LEGS (${legsPct}% - Cripple Chance)\n\nEnter 1, 2, or 3 (or cancel):`);
+    const choice = prompt(`=== ЗАХВАТ ЦЕЛИ V.A.T.S. ===\nЦель: ${target.name} (Здоровье: ${target.hp}/${target.maxHp})\n\n1: ГОЛОВА (${headPct}% - Крит / 2.2x урон)\n2: ТОРС (${torsoPct}% - Высокая меткость)\n3: НОГИ (${legsPct}% - Шанс обездвижить)\n\nВведите 1, 2 или 3 (или Отмена):`);
 
-    if (choice === '1') combat.attackTarget(target, 'head');
-    else if (choice === '2') combat.attackTarget(target, 'torso');
-    else if (choice === '3') combat.attackTarget(target, 'legs');
-    else cli.log('V.A.T.S. Targeting cancelled.', 'msg-system');
+    if (choice === '1') combat.attackTarget(target, 'голова');
+    else if (choice === '2') combat.attackTarget(target, 'торс');
+    else if (choice === '3') combat.attackTarget(target, 'ноги');
+    else cli.log('Прицеливание V.A.T.S. отменено.', 'msg-system');
 
     updateAll();
   }
 
-  // --- Tab Switching ---
+  // --- Переключение вкладок ---
   function switchTab(tabName) {
     currentTab = tabName;
     audio.playClick();
@@ -261,48 +287,48 @@ document.addEventListener('DOMContentLoaded', () => {
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  // --- Render Status Tab ---
+  // --- Вкладка СТАТУС ---
   function renderStatusTab() {
     tabStatus.innerHTML = `
       <div class="stats-grid">
         <div class="stats-card">
-          <div class="stats-card-title">S.P.E.C.I.A.L. ATTRIBUTES</div>
-          <div class="stat-row"><span>[ST] STRENGTH</span><span class="stat-val-highlight">${stats.special.ST}</span></div>
-          <div class="stat-row"><span>[PE] PERCEPTION</span><span class="stat-val-highlight">${stats.special.PE}</span></div>
-          <div class="stat-row"><span>[EN] ENDURANCE</span><span class="stat-val-highlight">${stats.special.EN}</span></div>
-          <div class="stat-row"><span>[CH] CHARISMA</span><span class="stat-val-highlight">${stats.special.CH}</span></div>
-          <div class="stat-row"><span>[IN] INTELLIGENCE</span><span class="stat-val-highlight">${stats.special.IN}</span></div>
-          <div class="stat-row"><span>[AG] AGILITY</span><span class="stat-val-highlight">${stats.special.AG}</span></div>
-          <div class="stat-row"><span>[LK] LUCK</span><span class="stat-val-highlight">${stats.special.LK}</span></div>
+          <div class="stats-card-title">ПАРАМЕТРЫ S.P.E.C.I.A.L.</div>
+          <div class="stat-row"><span>[СИЛ] СИЛА</span><span class="stat-val-highlight">${stats.special.ST}</span></div>
+          <div class="stat-row"><span>[ВОС] ВОСПРИЯТИЕ</span><span class="stat-val-highlight">${stats.special.PE}</span></div>
+          <div class="stat-row"><span>[ВЫН] ВЫНОСЛИВОСТЬ</span><span class="stat-val-highlight">${stats.special.EN}</span></div>
+          <div class="stat-row"><span>[ХАР] ХАРИЗМА</span><span class="stat-val-highlight">${stats.special.CH}</span></div>
+          <div class="stat-row"><span>[ИНТ] ИНТЕЛЛЕКТ</span><span class="stat-val-highlight">${stats.special.IN}</span></div>
+          <div class="stat-row"><span>[ЛОВ] ЛОВКОСТЬ</span><span class="stat-val-highlight">${stats.special.AG}</span></div>
+          <div class="stat-row"><span>[УДЧ] УДАЧА</span><span class="stat-val-highlight">${stats.special.LK}</span></div>
         </div>
 
         <div class="stats-card">
-          <div class="stats-card-title">COMBAT & SURVIVAL</div>
-          <div class="stat-row"><span>LEVEL</span><span class="stat-val-highlight">${stats.level}</span></div>
-          <div class="stat-row"><span>EXP</span><span>${stats.xp} / ${stats.nextLevelXp}</span></div>
-          <div class="stat-row"><span>ARMOR CLASS</span><span>${stats.calcArmorClass(inventory.equippedArmor?.acBonus || 0)}</span></div>
-          <div class="stat-row"><span>CARRY WEIGHT</span><span>${Math.round(inventory.getTotalWeight())} / ${stats.calcCarryWeight()} lbs</span></div>
-          <div class="stat-row"><span>RADIATION</span><span class="${stats.rads > 50 ? 'stat-alert' : ''}">${stats.rads} RADS</span></div>
-          <div class="stat-row"><span>BOTTLE CAPS</span><span class="stat-val-highlight">${stats.caps} ☢</span></div>
+          <div class="stats-card-title">БОЕВЫЕ ПОКАЗАТЕЛИ</div>
+          <div class="stat-row"><span>УРОВЕНЬ</span><span class="stat-val-highlight">${stats.level}</span></div>
+          <div class="stat-row"><span>ОПЫТ</span><span>${stats.xp} / ${stats.nextLevelXp}</span></div>
+          <div class="stat-row"><span>КЛАСС БРОНИ</span><span>${stats.calcArmorClass(inventory.equippedArmor?.acBonus || 0)}</span></div>
+          <div class="stat-row"><span>ГРУЗ</span><span>${Math.round(inventory.getTotalWeight())} / ${stats.calcCarryWeight()} фнт</span></div>
+          <div class="stat-row"><span>РАДИАЦИЯ</span><span class="${stats.rads > 50 ? 'stat-alert' : ''}">${stats.rads} РАД</span></div>
+          <div class="stat-row"><span>КРЫШКИ</span><span class="stat-val-highlight">${stats.caps} ☢</span></div>
         </div>
 
         <div class="stats-card" style="grid-column: 1 / -1;">
-          <div class="stats-card-title">SKILLS & SPECIALIZATIONS (Skill Pts: ${stats.skillPoints})</div>
+          <div class="stats-card-title">НАВЫКИ И СПЕЦИАЛИЗАЦИИ (Очков навыков: ${stats.skillPoints})</div>
           <div class="stat-row">
-            <span>Small Guns: ${stats.skills.smallGuns}%</span>
-            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="smallGuns">+5</button>` : ''}
+            <span>Легкое оружие: ${stats.skills.smallGuns}%</span>
+            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="smallGuns">+5%</button>` : ''}
           </div>
           <div class="stat-row">
-            <span>Melee Weapons: ${stats.skills.melee}%</span>
-            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="melee">+5</button>` : ''}
+            <span>Рукопашный бой: ${stats.skills.melee}%</span>
+            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="melee">+5%</button>` : ''}
           </div>
           <div class="stat-row">
-            <span>First Aid: ${stats.skills.firstAid}%</span>
-            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="firstAid">+5</button>` : ''}
+            <span>Первая помощь: ${stats.skills.firstAid}%</span>
+            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="firstAid">+5%</button>` : ''}
           </div>
           <div class="stat-row">
-            <span>Lockpick: ${stats.skills.lockpick}%</span>
-            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="lockpick">+5</button>` : ''}
+            <span>Взлом замков: ${stats.skills.lockpick}%</span>
+            ${stats.skillPoints >= 5 ? `<button class="stat-btn-plus" data-skill="lockpick">+5%</button>` : ''}
           </div>
         </div>
       </div>
@@ -319,12 +345,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Render Inventory Tab ---
+  // --- Вкладка ИНВЕНТАРЬ ---
   function renderInventoryTab() {
     tabInventory.innerHTML = `
       <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
-        <span>LOAD: ${Math.round(inventory.getTotalWeight())} / ${stats.calcCarryWeight()} LBS</span>
-        <span>CAPS: ${stats.caps} ☢</span>
+        <span>ВЕС: ${Math.round(inventory.getTotalWeight())} / ${stats.calcCarryWeight()} ФНТ</span>
+        <span>КРЫШКИ: ${stats.caps} ☢</span>
       </div>
       <div class="inv-list">
         ${inventory.items.map(item => {
@@ -335,18 +361,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="inv-item-row">
               <div>
                 <strong style="color:${isEquipped ? '#55ff55' : '#fff'}">${item.name}</strong>
-                <span style="font-size:11px; opacity:0.8;"> x${item.count} (${item.weight * item.count} lbs)</span>
-                ${isEquipped ? '<span style="color:#77ff77; font-size:10px;"> [EQUIPPED]</span>' : ''}
+                <span style="font-size:11px; opacity:0.8;"> x${item.count} (${Math.round(item.weight * item.count * 10)/10} фнт)</span>
+                ${isEquipped ? '<span style="color:#77ff77; font-size:10px;"> [НАДЕТО]</span>' : ''}
                 <div style="font-size:10px; color:#8cb88c; margin-top:2px;">${item.desc || ''}</div>
               </div>
               <div class="item-actions">
                 ${(item.type === 'weapon' || item.type === 'armor') ? `
                   <button class="btn-item-action btn-inv-equip" data-id="${item.id}">
-                    ${isEquipped ? 'Unequip' : 'Equip'}
+                    ${isEquipped ? 'Снять' : 'Надеть'}
                   </button>
                 ` : ''}
                 ${(item.type === 'med' || item.type === 'food') ? `
-                  <button class="btn-item-action btn-inv-use" data-id="${item.id}">Use</button>
+                  <button class="btn-item-action btn-inv-use" data-id="${item.id}">Применить</button>
                 ` : ''}
               </div>
             </div>
@@ -382,28 +408,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Render Archives Tab ---
+  // --- Вкладка АРХИВЫ ---
   function renderArchivesTab() {
     tabArchives.innerHTML = `
       <div style="background:#030803; border:1px solid var(--pip-green-dim); padding:10px; border-radius:4px; font-size:12px; line-height:1.4;">
-        <h3 style="color:#fff; margin-bottom:6px;">VAULT-TEC DATA ARCHIVE // FILE #771-A</h3>
-        <p style="margin-bottom:6px;"><strong>SUBJECT:</strong> Vault 13 Sub-Level Clearance Protocol</p>
+        <h3 style="color:#fff; margin-bottom:6px;">АРХИВ ДАННЫХ VAULT-TEC // ДОКУМЕНТ #771-A</h3>
+        <p style="margin-bottom:6px;"><strong>ОБЪЕКТ:</strong> Протокол зачистки нижнего уровня Убежища 13</p>
         <p style="margin-bottom:6px; color:#88cc88;">
-          Radiation sensors indicate leakages in Sector B-3. Biological hostiles detected including mutant Blatta orientalis (Radroach) and surface scavengers.
+          Датчики радиации фиксируют утечку охлаждающей жидкости в Секторе B-3. Зафиксирована активность мутировавших насекомых (Радтараканы) и рейдеров пустоши.
         </p>
         <p style="color:#ffb000;">
-          [DIRECTIVE]: Secure the level, gather all surviving medical supplies, eliminate hostile scavengers, and reach the surface exit elevator (&gt;).
+          [ДИРЕКТИВА]: Зачистить сектор, собрать уцелевшие медикаменты, нейтрализовать мародеров и добраться до грузового лифта на поверхность (&gt;).
         </p>
       </div>
     `;
   }
 
-  // --- Update HUD & Screen ---
+  // --- Обновление HUD телеметрии ---
   function updateHud() {
     if (hudHp) hudHp.textContent = `${stats.hp}/${stats.maxHp}`;
     if (hudAp) hudAp.textContent = `${stats.ap}/${stats.maxAp}`;
     if (hudRads) {
-      hudRads.textContent = `${stats.rads}r`;
+      hudRads.textContent = `${stats.rads}р`;
       if (stats.rads > 100) hudRads.classList.add('stat-alert');
       else hudRads.classList.remove('stat-alert');
     }
@@ -421,13 +447,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- Event Listeners: Navigation Buttons ---
+  // --- Переключение вкладок кнопками сайдбара ---
   document.getElementById('btnNavStatus')?.addEventListener('click', () => switchTab('status'));
   document.getElementById('btnNavGame')?.addEventListener('click', () => switchTab('game'));
   document.getElementById('btnNavInventory')?.addEventListener('click', () => switchTab('inventory'));
   document.getElementById('btnNavArchives')?.addEventListener('click', () => switchTab('archives'));
 
-  // Mobile Touch D-Pad
+  // Сенсорный D-Pad
   document.getElementById('dpadUp')?.addEventListener('click', () => movePlayer(0, -1));
   document.getElementById('dpadDown')?.addEventListener('click', () => movePlayer(0, 1));
   document.getElementById('dpadLeft')?.addEventListener('click', () => movePlayer(-1, 0));
@@ -435,19 +461,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('dpadWait')?.addEventListener('click', () => {
     stats.restoreAp();
     combat.enemyTurn();
-    cli.log('You rested and recovered Action Points.', 'msg-system');
+    cli.log('Вы пропустили ход и восстановили ОД.', 'msg-system');
     audio.playClick();
     updateAll();
   });
 
-  // Mobile Touch Actions
+  // Сенсорные кнопки действий
   document.getElementById('btnTouchAtk')?.addEventListener('click', () => {
     const target = getClosestEnemy();
     if (target) {
-      combat.attackTarget(target, 'torso');
+      combat.attackTarget(target, 'торс');
       updateAll();
     } else {
-      cli.log('No targets within attack range.', 'msg-combat');
+      cli.log('Врагов поблизости нет.', 'msg-combat');
     }
   });
 
@@ -461,13 +487,13 @@ document.addEventListener('DOMContentLoaded', () => {
       audio.playClick();
       updateAll();
     } else {
-      cli.log('No Stimpaks in inventory!', 'msg-combat');
+      cli.log('Стимпаки закончились!', 'msg-combat');
     }
   });
 
   document.getElementById('btnTouchInv')?.addEventListener('click', () => switchTab('inventory'));
 
-  // CLI Input Submit
+  // Отправка команды CLI
   function submitCli() {
     const cmd = cliInput.value;
     if (cmd.trim()) {
@@ -487,21 +513,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Keyboard Shortcuts (WASD, Arrows, 1-4 for tabs)
+  // Горячие клавиши клавиатуры (WASD, стрелки, пробел, 1-4)
   window.addEventListener('keydown', (e) => {
-    // If typing in input, don't trigger game hotkeys
     if (document.activeElement === cliInput) return;
 
-    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') movePlayer(0, -1);
-    else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') movePlayer(0, 1);
-    else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') movePlayer(-1, 0);
-    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') movePlayer(1, 0);
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'ц' || e.key === 'Ц') movePlayer(0, -1);
+    else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S' || e.key === 'ы' || e.key === 'Ы') movePlayer(0, 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ф' || e.key === 'Ф') movePlayer(-1, 0);
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D' || e.key === 'в' || e.key === 'В') movePlayer(1, 0);
     else if (e.key === ' ' || e.key === 'Spacebar') {
-      stats.restoreAp();
-      combat.enemyTurn();
-      cli.log('Turn skipped. AP recovered.', 'msg-system');
-      updateAll();
-    } else if (e.key === 'v' || e.key === 'V') {
+      waitTurn();
+    } else if (e.key === 'v' || e.key === 'V' || e.key === 'м' || e.key === 'М') {
       triggerVats();
     } else if (e.key === '1') switchTab('status');
     else if (e.key === '2') switchTab('game');
@@ -509,19 +531,58 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (e.key === '4') switchTab('archives');
   });
 
-  // Audio Toggle Button
+  // Переключатель звука
   document.getElementById('btnAudioToggle')?.addEventListener('click', () => {
     const isMuted = audio.toggleMute();
-    document.getElementById('btnAudioToggle').textContent = isMuted ? 'MUTE: ON' : 'AUDIO: ON';
+    document.getElementById('btnAudioToggle').textContent = isMuted ? 'ЗВУК: ВЫКЛ' : 'ЗВУК: ВКЛ';
     audio.playClick();
   });
 
-  // First boot logging
-  cli.log('PIP-BOY 2000 BIOS v2.4.1 DETECTED.', 'msg-system');
-  cli.log('INITIALIZING VAULT-TEC ASCII SUBSYSTEM...', 'msg-system');
-  cli.log('Ready! Use D-Pad, WASD, or CLI below. Type "help" for command list.', 'msg-item');
+  // Модальное окно "Поделиться / QR-код для телефона"
+  const modalShare = document.getElementById('modalShare');
+  const btnShareOpen = document.getElementById('btnShareOpen');
+  const btnShareClose = document.getElementById('btnShareClose');
+  const shareUrlInput = document.getElementById('shareUrlInput');
+  const btnCopyUrl = document.getElementById('btnCopyUrl');
 
-  // Initial draw
+  if (btnShareOpen && modalShare) {
+    btnShareOpen.addEventListener('click', () => {
+      audio.playClick();
+      // Определяем актуальный URL
+      const currentUrl = window.location.href;
+      if (shareUrlInput) shareUrlInput.value = currentUrl;
+
+      // Генерируем QR-код через проверенный Google/QRServer сервис
+      const qrImg = document.getElementById('qrCodeImage');
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(currentUrl)}&color=33-255-68&bgcolor=7-14-6`;
+      }
+      modalShare.style.display = 'flex';
+    });
+  }
+
+  if (btnShareClose && modalShare) {
+    btnShareClose.addEventListener('click', () => {
+      audio.playClick();
+      modalShare.style.display = 'none';
+    });
+  }
+
+  if (btnCopyUrl && shareUrlInput) {
+    btnCopyUrl.addEventListener('click', () => {
+      shareUrlInput.select();
+      navigator.clipboard?.writeText(shareUrlInput.value);
+      btnCopyUrl.textContent = 'СКОПИРОВАНО!';
+      audio.playClick();
+      setTimeout(() => { btnCopyUrl.textContent = 'КОПИРОВАТЬ'; }, 2000);
+    });
+  }
+
+  // Приветственные сообщения в консоли
+  cli.log('PIP-BOY 2000 BIOS v2.4.1 [РУССКАЯ ВЕРСИЯ]', 'msg-system');
+  cli.log('ИНИЦИАЛИЗАЦИЯ ASCII МАТРИЦЫ VAULT-TEC...', 'msg-system');
+  cli.log('Используйте D-Pad, WASD или строку команд. Введите "помощь" для списка команд.', 'msg-item');
+
   switchTab('game');
   updateAll();
 });

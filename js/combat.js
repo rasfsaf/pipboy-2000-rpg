@@ -1,6 +1,6 @@
 /**
- * Fallout Turn-Based Combat & VATS Targeting Engine
- * Calculates hit probability, critical strikes, body part damage and enemy AI turns.
+ * Fallout Turn-Based Combat & VATS Targeting Engine (Русская локализация)
+ * Расчет шанса попадания, критических попаданий, урона по частям тела и ходов врагов.
  */
 
 class CombatEngine {
@@ -24,32 +24,32 @@ class CombatEngine {
     if (isRanged) {
       if (dist > w.range) penalty += (dist - w.range) * 15;
     } else if (dist > 1.5) {
-      return 0; // Out of melee range
+      return 0; // Вне дистанции рукопашного боя
     }
 
     let partModifier = 0;
-    if (bodyPart === 'head') partModifier = -25;
-    if (bodyPart === 'legs') partModifier = -10;
-    if (bodyPart === 'torso') partModifier = 10;
+    if (bodyPart === 'head' || bodyPart === 'голова') partModifier = -25;
+    if (bodyPart === 'legs' || bodyPart === 'ноги') partModifier = -10;
+    if (bodyPart === 'torso' || bodyPart === 'торс') partModifier = 10;
 
     const baseChance = skillVal + (this.stats.special.PE * 4) + partModifier - target.ac - penalty;
     return Math.max(5, Math.min(95, Math.round(baseChance)));
   }
 
   attackTarget(target, bodyPart = 'torso') {
-    const weapon = this.inv.equippedWeapon || { name: 'Fists', minDmg: 1, maxDmg: 3, apCost: 2, range: 1 };
+    const weapon = this.inv.equippedWeapon || { name: 'Кулаки', minDmg: 1, maxDmg: 3, apCost: 2, range: 1 };
     
-    // Check AP
+    // Проверка Очков Действия (AP)
     if (this.stats.ap < weapon.apCost) {
-      this.cli.log(`Not enough Action Points! Need ${weapon.apCost} AP, have ${this.stats.ap} AP.`, 'msg-combat');
+      this.cli.log(`Недостаточно Очков Действия! Нужно: ${weapon.apCost} ОД, доступно: ${this.stats.ap} ОД.`, 'msg-combat');
       return false;
     }
 
-    // Check Ammo
+    // Проверка патронов
     if (weapon.id === '10mm_pistol') {
       const ammo = this.inv.getItem('10mm_ammo');
       if (!ammo || ammo.count <= 0) {
-        this.cli.log(`*CLICK* Out of 10mm Ammo!`, 'msg-combat');
+        this.cli.log(`*ЩЕЛЧОК* Кончились 10мм патроны!`, 'msg-combat');
         this.audio.playClick();
         return false;
       }
@@ -58,7 +58,6 @@ class CombatEngine {
 
     this.stats.spendAp(weapon.apCost);
 
-    // Audio SFX
     if (weapon.id === '10mm_pistol') {
       this.audio.playGunshot();
     } else {
@@ -68,31 +67,33 @@ class CombatEngine {
     const hitChance = this.calculateHitChance(target, bodyPart, weapon);
     const roll = Math.floor(Math.random() * 100) + 1;
 
+    const partName = (bodyPart === 'head' || bodyPart === 'голова') ? 'ГОЛОВА' :
+                     (bodyPart === 'legs' || bodyPart === 'ноги') ? 'НОГИ' : 'ТОРС';
+
     if (roll <= hitChance) {
-      // Hit! Check Crit
-      const isCrit = Math.random() * 100 <= this.stats.calcCritChance() || (bodyPart === 'head' && Math.random() < 0.3);
+      const isCrit = Math.random() * 100 <= this.stats.calcCritChance() || ((bodyPart === 'head' || bodyPart === 'голова') && Math.random() < 0.3);
       let rawDmg = Math.floor(Math.random() * (weapon.maxDmg - weapon.minDmg + 1)) + weapon.minDmg;
 
-      if (bodyPart === 'head') rawDmg = Math.round(rawDmg * 2.2);
+      if (bodyPart === 'head' || bodyPart === 'голова') rawDmg = Math.round(rawDmg * 2.2);
       if (isCrit) rawDmg = Math.round(rawDmg * 1.5);
 
       const finalDmg = Math.max(1, rawDmg);
       target.hp -= finalDmg;
 
       if (isCrit) {
-        this.cli.log(`CRITICAL HIT on ${target.name} [${bodyPart.toUpperCase()}] for ${finalDmg} DMG!`, 'msg-crit');
+        this.cli.log(`КРИТИЧЕСКИЙ УДАР по цели ${target.name} [${partName}] на ${finalDmg} УРОНА!`, 'msg-crit');
       } else {
-        this.cli.log(`Hit ${target.name} [${bodyPart.toUpperCase()}] for ${finalDmg} DMG.`, 'msg-combat');
+        this.cli.log(`Попадание в ${target.name} [${partName}]: нанесен ${finalDmg} урона.`, 'msg-combat');
       }
 
       if (target.hp <= 0) {
         this.killEnemy(target);
       }
     } else {
-      this.cli.log(`You aimed at ${target.name} [${bodyPart.toUpperCase()}] (${hitChance}%) and MISSED!`, 'msg-combat');
+      this.cli.log(`Вы целились в ${target.name} [${partName}] (${hitChance}%) и ПРОМАХНУЛИСЬ!`, 'msg-combat');
     }
 
-    // Trigger enemy retaliation if still alive and player has 0 AP
+    // Ответный ход врага при исчерпании ОД
     if (this.stats.ap <= 1) {
       this.enemyTurn();
       this.stats.restoreAp();
@@ -102,24 +103,25 @@ class CombatEngine {
   }
 
   killEnemy(target) {
-    this.cli.log(`${target.name} was slaughtered! Gained +${target.xp} XP.`, 'msg-crit');
+    this.cli.log(`${target.name} уничтожен! Получено +${target.xp} опыта.`, 'msg-crit');
     this.audio.playHit();
 
-    // Check for level up
+    // Проверка повышения уровня
     const leveled = this.stats.addXp(target.xp);
     if (leveled.length > 0) {
       leveled.forEach(lvl => {
-        this.cli.log(`★★★ LEVEL UP! Reached Level ${lvl}! AP & HP restored! ★★★`, 'msg-item');
+        this.cli.log(`★★★ НОВЫЙ УРОВЕНЬ! Достигнут уровень ${lvl}! Здоровье и ОД восстановлены! ★★★`, 'msg-item');
         this.audio.playLevelUp();
       });
     }
 
-    // Drop loot at corpse position
+    // Выпадение крышек
+    const droppedCaps = Math.floor(Math.random() * 15) + 5;
     this.world.loot.push({
       id: Date.now(),
       x: target.x,
       y: target.y,
-      items: [{ id: 'caps', name: 'Bottle Caps', count: Math.floor(Math.random() * 15) + 5 }]
+      items: [{ id: 'caps', name: 'Крышки от бутылок', count: droppedCaps }]
     });
   }
 
@@ -130,7 +132,7 @@ class CombatEngine {
 
       if (dist <= 6 && this.world.visible[enemy.y][enemy.x]) {
         if (dist <= 1.5) {
-          // Attack player
+          // Атака игрока
           const hitRoll = Math.floor(Math.random() * 100) + 1;
           const playerAc = this.stats.calcArmorClass(this.inv.equippedArmor?.acBonus || 0);
           const hitChance = Math.max(20, 85 - playerAc);
@@ -141,15 +143,15 @@ class CombatEngine {
             dmg = Math.max(1, dmg - dr);
             const dead = this.stats.takeDamage(dmg);
             this.audio.playHit();
-            this.cli.log(`${enemy.name} strikes you for ${dmg} DMG! (HP: ${this.stats.hp}/${this.stats.maxHp})`, 'msg-combat');
+            this.cli.log(`${enemy.name} атакует вас и наносит ${dmg} урона! (ОЗ: ${this.stats.hp}/${this.stats.maxHp})`, 'msg-combat');
             if (dead) {
-              this.cli.log(`☠ YOU HAVE DIED IN THE WASTELAND. REBOOTING PIP-BOY...`, 'msg-crit');
+              this.cli.log(`☠ ВЫ ПОГИБЛИ В ПУСТОШАХ. ПЕРЕЗАГРУЗКА PIP-BOY...`, 'msg-crit');
             }
           } else {
-            this.cli.log(`${enemy.name} lunges at you and misses!`, 'msg-combat');
+            this.cli.log(`${enemy.name} бросается на вас, но промахивается!`, 'msg-combat');
           }
         } else {
-          // Move towards player
+          // Движение к игроку
           const stepX = Math.sign(this.world.playerX - enemy.x);
           const stepY = Math.sign(this.world.playerY - enemy.y);
           const targetX = enemy.x + stepX;

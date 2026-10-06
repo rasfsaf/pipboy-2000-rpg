@@ -1,79 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pip-Boy 2000 - ASCII RPG System</title>
+  <title>Pip-Boy 2000 - Пошаговая ASCII RPG</title>
   
-  <!-- Retro Stylesheets -->
+  <!-- Стили интерфейса Pip-Boy -->
   <link rel="stylesheet" href="css/pipboy-frame.css">
   <link rel="stylesheet" href="css/crt-screen.css">
   <link rel="stylesheet" href="css/controls.css">
 </head>
 <body>
 
-  <!-- PIP-BOY 2000 PHYSICAL DEVICE CHASSIS -->
+  <!-- КОРПУС УСТРОЙСТВА PIP-BOY 2000 -->
   <div class="pipboy-chassis">
-    <!-- Corner Hardware Screws -->
+    <!-- Угловые индустриальные винты -->
     <div class="screw screw-tl"></div>
     <div class="screw screw-tr"></div>
     <div class="screw screw-bl"></div>
     <div class="screw screw-br"></div>
 
-    <!-- Quick Audio & Screen Toggle -->
+    <!-- Верхняя панель быстрых настроек -->
     <div class="device-controls-top">
-      <button class="mini-toggle-btn" id="btnAudioToggle">AUDIO: ON</button>
+      <button class="mini-toggle-btn" id="btnShareOpen">📱 ДЛЯ ТЕЛЕФОНА / QR</button>
+      <button class="mini-toggle-btn" id="btnAudioToggle">ЗВУК: ВКЛ</button>
     </div>
 
     <!-- ==============================================================
-         LEFT HARDWARE PANEL (Fallout 1 / Fallout 2 Pip-Boy 2000)
+         ЛЕВЫЙ САЙДБАР (Панель управления Fallout 1 / Fallout 2)
          ============================================================== -->
     <aside class="pipboy-sidebar">
-      <!-- 1. Top Section: Date / Time LED Display & Vault Boy Plaque -->
+      <!-- 1. Верхний блок: LED индикатор даты и табличка Волт-Боя -->
       <div class="sidebar-panel-top">
         <div class="date-counter">
-          <span>01 APR 2242</span>
+          <span>01 АПР 2242</span>
           <span class="rad-symbol">☢</span>
           <span>0030</span>
         </div>
         <div class="badge-frame">
-          <img src="assets/pipboy_badge.jpg" alt="Pip-Boy 2000 Emblem" class="badge-img">
+          <img src="assets/pipboy_badge.jpg" alt="Эмблема Pip-Boy 2000" class="badge-img">
         </div>
       </div>
 
-      <!-- 2. Middle Section: Glowing Nixie / Vacuum Radio Tubes -->
+      <!-- 2. Средний блок: Светящиеся радиолампы за защитной решеткой -->
       <div class="sidebar-panel-tubes">
-        <img src="assets/vacuum_tubes.jpg" alt="Vacuum Radio Tubes" class="tubes-img">
+        <img src="assets/vacuum_tubes.jpg" alt="Вакуумные радиолампы" class="tubes-img">
         <div class="tubes-glow-overlay"></div>
       </div>
 
-      <!-- 3. Bottom Section: Heavy Industrial Switch Buttons -->
+      <!-- 3. Нижний блок: Тумблеры с аварийной полосой и индикаторами -->
       <div class="sidebar-panel-buttons">
         <div class="hazard-stripe-bar"></div>
         
         <div class="buttons-column">
           <button class="pip-switch-btn" id="btnNavStatus">
             <span class="led-indicator"></span>
-            <span>STATUS</span>
+            <span>СТАТУС</span>
           </button>
           
           <button class="pip-switch-btn active" id="btnNavGame">
             <span class="led-indicator"></span>
-            <span>MAP / GAME</span>
+            <span>КАРТЫ</span>
           </button>
           
           <button class="pip-switch-btn" id="btnNavInventory">
             <span class="led-indicator"></span>
-            <span>INVENTORY</span>
+            <span>ИНВЕНТАРЬ</span>
           </button>
           
           <button class="pip-switch-btn" id="btnNavArchives">
             <span class="led-indicator"></span>
-            <span>ARCHIVES</span>
+            <span>АРХИВЫ</span>
           </button>
         </div>
 
-        <!-- Conduit Wires connecting sidebar to the CRT screen -->
+        <!-- Провода, соединяющие панель с монитором -->
         <div class="conduit-wires">
           <div class="wire wire-red"></div>
           <div class="wire wire-blue"></div>
@@ -84,79 +85,79 @@
     </aside>
 
     <!-- ==============================================================
-         CENTER / RIGHT CRT PHOSPHOR SCREEN & GAMEPLAY
+         МОНИТОР ЭЛТ С ЗЕЛЕНЫМ ФОСФОРОМ И ИГРОВЫМ ЭКРАНОМ
          ============================================================== -->
     <main class="pipboy-screen-bezel">
       <div class="crt-screen">
-        <!-- CRT Phosphor Green Scanlines & Glass Reflection -->
+        <!-- Сканлинии и кинескопные блики -->
         <div class="crt-overlay"></div>
         <div class="crt-glare"></div>
 
-        <!-- Main Display Viewport -->
+        <!-- Основной экран отображения -->
         <div class="screen-viewport">
-          <!-- Top Telemetry Status Header -->
+          <!-- Верхняя строка телеметрии -->
           <header class="crt-header">
             <div class="crt-title">
               <span>PIP-BOY 2000</span>
-              <span style="font-size: 10px; opacity: 0.7;">[VAULT-TEC OS]</span>
+              <span style="font-size: 10px; opacity: 0.7;">[СИСТЕМА VAULT-TEC]</span>
             </div>
             <div class="crt-stats-strip">
-              <div>HP: <span id="hudHp" class="stat-val-highlight">--/--</span></div>
-              <div>AP: <span id="hudAp" class="stat-val-highlight">--/--</span></div>
-              <div>RAD: <span id="hudRads">0r</span></div>
-              <div>CAPS: <span id="hudCaps" class="stat-val-highlight">0</span>☢</div>
+              <div>ОЗ: <span id="hudHp" class="stat-val-highlight">--/--</span></div>
+              <div>ОД: <span id="hudAp" class="stat-val-highlight">--/--</span></div>
+              <div>РАД: <span id="hudRads">0р</span></div>
+              <div>КРЫШКИ: <span id="hudCaps" class="stat-val-highlight">0</span>☢</div>
             </div>
           </header>
 
-          <!-- TAB 1: ASCII WORLD GAMEPLAY & LOG -->
+          <!-- ВКЛАДКА 1: КАРТА ASCII МИРА И ЛОГ ТЕРМИНАЛА -->
           <section id="tabGame" class="tab-content active">
-            <!-- ASCII Roguelike Screen -->
+            <!-- Экран ASCII-мира -->
             <div class="ascii-map-container">
-              <pre id="asciiGrid" class="ascii-grid">INITIALIZING ASCII MATRIX...</pre>
+              <pre id="asciiGrid" class="ascii-grid">ЗАГРУЗКА ASCII МАТРИЦЫ...</pre>
             </div>
 
-            <!-- Custom CLI Console Output Log -->
+            <!-- Лог вывода сообщений кастомного CLI -->
             <div id="cliLog" class="cli-log-container"></div>
 
-            <!-- Interactive CLI Input Bar -->
+            <!-- Строка ввода команд CLI -->
             <div class="cli-input-bar">
               <span class="cli-prompt-label">PIP-OS &gt;</span>
-              <input type="text" id="cliInput" class="cli-input" placeholder="type 'help', 'look', 'n', 'attack', 'vats'..." autocomplete="off" autocapitalize="off" spellcheck="false">
-              <button id="btnRunCmd" class="cli-btn-run">EXEC</button>
+              <input type="text" id="cliInput" class="cli-input" placeholder="введите 'помощь', 'осмотр', 'с', 'атака', 'ватс'..." autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button id="btnRunCmd" class="cli-btn-run">ВВОД</button>
             </div>
           </section>
 
-          <!-- TAB 2: CHARACTER SHEET / S.P.E.C.I.A.L. STATS -->
+          <!-- ВКЛАДКА 2: ХАРАКТЕРИСТИКИ S.P.E.C.I.A.L. И НАВЫКИ -->
           <section id="tabStatus" class="tab-content"></section>
 
-          <!-- TAB 3: INVENTORY & EQUIPMENT -->
+          <!-- ВКЛАДКА 3: ИНВЕНТАРЬ И СНАРЯЖЕНИЕ -->
           <section id="tabInventory" class="tab-content"></section>
 
-          <!-- TAB 4: ARCHIVES & LORE -->
+          <!-- ВКЛАДКА 4: АРХИВЫ ДАННЫХ УБЕЖИЩА -->
           <section id="tabArchives" class="tab-content"></section>
 
           <!-- ==============================================================
-               ANDROID & MOBILE ON-SCREEN TOUCH CONTROLS
+               СЕНСОРНЫЕ КНОПКИ ДЛЯ ANDROID И ТЕЛЕФОНОВ
                ============================================================== -->
           <nav class="mobile-touch-hud">
-            <!-- Virtual Touch D-Pad -->
+            <!-- Виртуальный D-Pad перемещения -->
             <div class="dpad-container">
               <button class="dpad-btn dpad-up" id="dpadUp">▲</button>
               <button class="dpad-btn dpad-left" id="dpadLeft">◀</button>
-              <button class="dpad-btn dpad-wait" id="dpadWait">WAIT</button>
+              <button class="dpad-btn dpad-wait" id="dpadWait">ЖДАТЬ</button>
               <button class="dpad-btn dpad-right" id="dpadRight">▶</button>
               <button class="dpad-btn dpad-down" id="dpadDown">▼</button>
             </div>
 
-            <!-- Quick Action Touch Buttons -->
+            <!-- Быстрые действия -->
             <div class="touch-actions-group">
               <div class="action-row">
-                <button class="action-touch-btn btn-atk" id="btnTouchAtk">⚔ ATK</button>
-                <button class="action-touch-btn btn-vats" id="btnTouchVats">🎯 VATS</button>
+                <button class="action-touch-btn btn-atk" id="btnTouchAtk">⚔ АТАКА</button>
+                <button class="action-touch-btn btn-vats" id="btnTouchVats">🎯 ВАТС</button>
               </div>
               <div class="action-row">
-                <button class="action-touch-btn" id="btnTouchStimpak">💉 STIM</button>
-                <button class="action-touch-btn" id="btnTouchInv">🎒 INV</button>
+                <button class="action-touch-btn" id="btnTouchStimpak">💉 СТИМ</button>
+                <button class="action-touch-btn" id="btnTouchInv">🎒 ИНВ</button>
               </div>
             </div>
           </nav>
@@ -165,7 +166,28 @@
     </main>
   </div>
 
-  <!-- JavaScript Modules -->
+  <!-- ==============================================================
+       МОДАЛЬНОЕ ОКНО: ПОДЕЛИТЬСЯ И ОТКРЫТЬ НА ТЕЛЕФОНЕ ПО QR-КОДУ
+       ============================================================== -->
+  <div id="modalShare" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; padding:16px;">
+    <div style="background:#0c140a; border:2px solid #33ff44; box-shadow:0 0 25px rgba(51,255,68,0.4); border-radius:12px; max-width:380px; width:100%; padding:20px; color:#33ff44; font-family:'Courier New', monospace; text-align:center;">
+      <h3 style="color:#fff; margin-bottom:12px; font-size:15px; letter-spacing:1px;">СИНХРОНИЗАЦИЯ С ТЕЛЕФОНОМ</h3>
+      <p style="font-size:12px; margin-bottom:14px; color:#aaffaa;">Отсканируйте QR-код камерой мобильного телефона, чтобы открыть игру:</p>
+      
+      <div style="background:#070e06; border:2px solid #1a421e; padding:10px; display:inline-block; border-radius:8px; margin-bottom:14px;">
+        <img id="qrCodeImage" src="" alt="QR-код для мобильного" style="width:180px; height:180px; display:block;">
+      </div>
+
+      <div style="display:flex; gap:6px; margin-bottom:14px;">
+        <input type="text" id="shareUrlInput" readonly style="flex:1; background:#040804; border:1px solid #1a421e; color:#fff; padding:6px 8px; font-size:11px; font-family:monospace; border-radius:4px; outline:none;">
+        <button id="btnCopyUrl" style="background:#1a421e; border:1px solid #33ff44; color:#fff; padding:6px 10px; font-size:11px; font-family:monospace; border-radius:4px; cursor:pointer;">КОПИРОВАТЬ</button>
+      </div>
+
+      <button id="btnShareClose" style="background:#33ff44; color:#000; border:none; padding:8px 20px; font-family:monospace; font-weight:bold; font-size:12px; border-radius:4px; cursor:pointer; width:100%;">ЗАКРЫТЬ</button>
+    </div>
+  </div>
+
+  <!-- JavaScript Модули -->
   <script src="js/audio.js"></script>
   <script src="js/rpg-stats.js"></script>
   <script src="js/inventory.js"></script>
